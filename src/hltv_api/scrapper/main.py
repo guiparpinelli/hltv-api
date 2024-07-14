@@ -1,6 +1,7 @@
 import httpx
 from datetime import datetime
 
+
 class HLTVClient:
     base_url: str = "https://www.hltv.org/"
     default_headers: dict[str, str] = {
@@ -34,12 +35,16 @@ class HLTVClient:
         extra_headers = kwargs.pop("headers", {})
         headers.update(extra_headers)
         url = cls.base_url + path
-        response = httpx.get(url, headers=headers, **kwargs)
-        response.raise_for_status()
-        return response.text
+        try:
+            response = httpx.get(url, headers=headers, **kwargs)
+            response.raise_for_status()
+            return response.text
+        except httpx.RequestError as e:
+            print(f"An error occurred while requesting {url}: {e}")
+            return ""
 
     @classmethod
-    def validate_hltv_url(cls, path: str) -> str:
+    def validate_hltv_url(cls, base_path: str) -> str:
         """
         Validates URLs for the best of the month on HLTV, testing dates from 1 to 30 for the current month.
 
@@ -55,14 +60,14 @@ class HLTVClient:
         valid_urls = []
 
         for day in range(1, 31):
-            path = f"{path}/{year}/{month}/{day:02d}"
+            path = f"{base_path}/{year}/{month}/{day:02d}"
             full_url = cls.base_url + path
             try:
                 response = httpx.get(full_url, headers=cls.default_headers)
                 if response.status_code == 200:
                     valid_urls.append(path)
-            except httpx.RequestError as e:
-                pass
+            except httpx.RequestError:
+                continue
 
         if valid_urls:
             return valid_urls[-1]  # Return the most recent valid URL

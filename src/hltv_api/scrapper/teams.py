@@ -1,3 +1,5 @@
+from typing import List, Any
+
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from main import HLTVClient
@@ -11,6 +13,15 @@ class Team(BaseModel):
 
     @classmethod
     def get_all_teams(cls, client: HLTVClient) -> list[str]:
+        """
+        Fetches and returns a list of all teams from HLTV.
+
+        Args:
+            client (HLTVClient): The client to fetch the page.
+
+        Returns:
+            list[str]: A list of team URLs.
+        """
         results_html = client.fetch_page("stats/teams?minMapCount=0")
         if not results_html:
             return []
@@ -26,8 +37,14 @@ class Team(BaseModel):
         return teams
 
     @classmethod
-    def get_top_5_teams(cls) -> list[str]:
-        client = HLTVClient
+    def get_top_5_teams(cls) -> list[Any]:
+        """
+        Fetches and returns the top 5 teams from HLTV.
+
+        Returns:
+            list[Any]: A list of top 5 teams with their names, points, and player names.
+        """
+        client = HLTVClient()
         recent_url = client.validate_hltv_url("ranking/teams")
         results_html = client.fetch_page(recent_url)
         if not results_html:
@@ -45,8 +62,14 @@ class Team(BaseModel):
         return result
 
     @classmethod
-    def get_top_30_teams(cls) -> list[str]:
-        client = HLTVClient
+    def get_top_30_teams(cls) -> list[Any]:
+        """
+        Fetches and returns the top 30 teams from HLTV.
+
+        Returns:
+            list[Any]: A list of top 30 teams with their names, points, and player names.
+        """
+        client = HLTVClient()
         recent_url = client.validate_hltv_url("ranking/teams")
         results_html = client.fetch_page(recent_url)
         if not results_html:
