@@ -64,25 +64,6 @@ class Team(BaseModel):
         return result
 
     @classmethod
-    def get_top_30_teams(cls) -> list[str]:
-        client = HLTVClient
-        recent_url = client.validate_hltv_url("ranking/teams")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
-
-    @classmethod
     def from_html(cls, soup: BeautifulSoup) -> "Team":
         """
         Parses a BeautifulSoup object to extract team information.
