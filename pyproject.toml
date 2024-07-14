@@ -1,0 +1,27 @@
+[project]
+name = "hltv-api"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Guilherme Parpinelli", email = "guilheerme.p@gmail.com" }
+]
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "pydantic>=2.8.2",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hltv_api"]

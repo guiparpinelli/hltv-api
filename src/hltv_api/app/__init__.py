@@ -1,0 +1,3 @@
+"""
+hltv-api application.
+"""
