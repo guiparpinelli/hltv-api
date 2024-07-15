@@ -44,7 +44,7 @@ class HLTVClient:
             return ""
 
     @classmethod
-    def validate_hltv_url(cls, base_path: str) -> str:
+    def validate_hltv_url(cls, base_path: str, path: str = "") -> str:
         """
         Validates URLs for the best of the month on HLTV, testing dates from 1 to 30 for the current month.
 
@@ -60,12 +60,12 @@ class HLTVClient:
         valid_urls = []
 
         for day in range(1, 31):
-            path = f"{base_path}/{year}/{month}/{day:02d}"
-            full_url = cls.base_url + path
+            date_path = f"{base_path}/{year}/{month}/{day:02d}/{path}"
+            full_url = cls.base_url + date_path
             try:
                 response = httpx.get(full_url, headers=cls.default_headers)
                 if response.status_code == 200:
-                    valid_urls.append(path)
+                    valid_urls.append(date_path)
             except httpx.RequestError:
                 continue
 
