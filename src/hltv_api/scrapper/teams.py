@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from main import HLTVClient
@@ -6,21 +6,12 @@ from main import HLTVClient
 
 class Team(BaseModel):
     name: str
-    players: list[str]
+    players: List[str]
     coach: str
     position: str
 
     @classmethod
-    def get_all_teams(cls, client: HLTVClient) -> list[str]:
-        """
-        Fetches and returns a list of all team URLs from HLTV.
-
-        Args:
-            client (HLTVClient): The client to fetch the page.
-
-        Returns:
-            list[str]: A list of team URLs.
-        """
+    def get_all_teams(cls, client: HLTVClient) -> List[str]:
         results_html = client.fetch_page("stats/teams?minMapCount=0")
         if not results_html:
             return []
@@ -36,20 +27,16 @@ class Team(BaseModel):
         return teams
 
     @classmethod
-    def get_top_5_teams(cls) -> list[Any]:
-        """
-        Fetches and returns the top 5 teams from HLTV with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top 5 teams with their names, points, and player names.
-        """
+    def get_teams_by_region(cls, url_suffix: str, limit: Optional[int] = None) -> List[Any]:
         client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams")
+        recent_url = client.validate_hltv_url(f"ranking/teams{url_suffix}")
         results_html = client.fetch_page(recent_url)
         if not results_html:
             return []
         soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')[:5]
+        teams = soup.select('.ranked-team.standard-box')
+        if limit:
+            teams = teams[:limit]
 
         result = []
         for team in teams:
@@ -61,166 +48,35 @@ class Team(BaseModel):
         return result
 
     @classmethod
-    def get_top_30_teams(cls) -> list[Any]:
-        """
-        Fetches and returns the top 30 teams from HLTV with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top 30 teams with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    def get_top_5_teams(cls) -> List[Any]:
+        return cls.get_teams_by_region("", limit=5)
 
     @classmethod
-    def get_top_teams_south_america(cls) -> list[Any]:
-        """
-        Fetches and returns the top teams from South America with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top teams from South America with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams", "country/South%20America")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    def get_top_30_teams(cls) -> List[Any]:
+        return cls.get_teams_by_region("")
 
     @classmethod
-    def get_top_teams_north_america(cls) -> list[Any]:
-        """
-        Fetches and returns the top teams from North America with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top teams from North America with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams", "country/North%20America")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    def get_top_teams_south_america(cls) -> List[Any]:
+        return cls.get_teams_by_region("country/South%20America")
 
     @classmethod
-    def get_top_teams_europe(cls) -> list[Any]:
-        """
-        Fetches and returns the top teams from Europe with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top teams from Europe with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams", "country/europe")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    def get_top_teams_north_america(cls) -> List[Any]:
+        return cls.get_teams_by_region("country/North%20America")
 
     @classmethod
-    def get_top_teams_asia(cls) -> list[Any]:
-        """
-        Fetches and returns the top teams from Asia with their names, points, and player names.
-
-        Returns:
-            list[Any]: A list of the top teams from Asia with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams", "country/asia")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    def get_top_teams_europe(cls) -> List[Any]:
+        return cls.get_teams_by_region("country/europe")
 
     @classmethod
-    def get_top_teams_oceania(cls) -> list[Any]:
-        """
-        Fetches and returns the top teams from Oceania with their names, points, and player names.
+    def get_top_teams_asia(cls) -> List[Any]:
+        return cls.get_teams_by_region("country/asia")
 
-        Returns:
-            list[Any]: A list of the top teams from Oceania with their names, points, and player names.
-        """
-        client = HLTVClient()
-        recent_url = client.validate_hltv_url("ranking/teams", "country/oceania")
-        results_html = client.fetch_page(recent_url)
-        if not results_html:
-            return []
-        soup = BeautifulSoup(results_html, "html.parser")
-        teams = soup.select('.ranked-team.standard-box')
-
-        result = []
-        for team in teams:
-            team_name = team.select_one('.teamLine .name').get_text(strip=True)
-            team_points = team.select_one('.teamLine .points').get_text(strip=True)
-            player_names = [player.get_text(strip=True) for player in team.select('.rankingNicknames span')]
-            result.append([team_name, team_points, player_names])
-
-        return result
+    @classmethod
+    def get_top_teams_oceania(cls) -> List[Any]:
+        return cls.get_teams_by_region("country/oceania")
 
     @classmethod
     def from_html(cls, soup: BeautifulSoup) -> "Team":
-        """
-        Parses a BeautifulSoup object to extract team information.
-
-        Args:
-            soup (BeautifulSoup): The BeautifulSoup object containing the team's HTML.
-
-        Returns:
-            Team: A Team object with the extracted information.
-        """
         name = soup.find('h1', class_='profile-team-name text-ellipsis').text.strip()
         players = [span.text for span in soup.find_all('span', class_='text-ellipsis bold')]
         position = None
